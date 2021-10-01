@@ -1,26 +1,26 @@
 const rolls = [
     {
         label: 'Cronics',
-        count: 5,
-        start: 1, // don't include second place
+        count: 9,
+        start: 0,
         rank: 'elite'
     },
     {
         label: 'Cronics',
-        count: 3,
+        count: 4,
         start: 0,
         rank: 'strong'
     },
     {
         label: 'Cronics',
-        count: 2,
+        count: 1,
         start: 0,
         rank: 'gamer'
     },
     {
         label: 'Starverse',
         count: 1,
-        start: 0,
+        start: 1, // Skip 1st, already got loot
         rank: 'elite'
     },
     {
@@ -49,8 +49,8 @@ const rolls = [
     },
     {
         label: 'Cronic Wearables',
-        count: 5,
-        start: 2, // skip first and second (they already have loot)
+        count: 12,
+        start: 0,
         rank: 'elite'
     },
     {
@@ -61,76 +61,64 @@ const rolls = [
     },
     {
         label: 'Cronic Wearables',
-        count: 3,
+        count: 2,
         start: 0,
         rank: 'gamer'
     },
     {
         label: 'ICMoji',
-        count: 21,
-        start: 2, // skip first and second (they already have loot)
-        rank: 'elite'
-    },
-    {
-        label: 'ICMoji',
-        count: 17,
+        count: 34,
         start: 0,
-        rank: 'strong'
+        rank: 'elite'
     },
     {
         label: 'ICMoji',
         count: 15,
         start: 0,
+        rank: 'strong'
+    },
+    {
+        label: 'ICMoji',
+        count: 6,
+        start: 0,
         rank: 'gamer'
     },
     {
         label: 'IC Puzzle',
-        count: 5,
+        count: 2,
         start: 0,
-        rank: 'gamer'
-    },
-    {
-        label: 'IC Puppies',
-        count: 4,
-        start: 1, // skip second, they have loot
         rank: 'elite'
     },
     {
-        label: 'IC Puppies',
-        count: 1,
+        label: 'IC Puzzle',
+        count: 2,
         start: 0,
         rank: 'strong'
+    },
+    {
+        label: 'IC Puppies',
+        count: 5,
+        start: 0,
+        rank: 'elite'
     },
     {
         label: 'pokedbots',
+        count: 1,
+        start: 2, // skip first and second (they already have loot)
+        rank: 'elite'
+    },
+    {
+        label: 'The Sword',
         count: 2,
-        start: 1, // skip second (they already have loot)
-        rank: 'elite'
-    },
-    {
-        label: 'The Sword',
-        count: 1,
-        start: 2, // skip first and second (they already have loot)
-        rank: 'elite'
-    },
-    {
-        label: 'The Sword',
-        count: 1,
-        start: 0,
-        rank: 'strong'
-    },
-    {
-        label: 'IC Bunnies',
-        count: 1,
-        start: 2, // skip first and second (they already have loot)
+        start: 3, // skip first, second, third (they already have loot)
         rank: 'elite'
     },
     {
         label: 'IC Bunnies',
-        count: 1,
-        start: 0,
-        rank: 'strong'
-    },
+        count: 2,
+        start: 3, // skip first, second, third (they already have loot)
+        rank: 'elite'
+    }
 ];
 
 const conf = {
@@ -138,6 +126,7 @@ const conf = {
         chance: .04,
         bonus: .25,
         accounts: [
+        [56, 1.668042684],
         [424, 1.376680528],
         [722, 1.128441562],
         [1880, 1],
@@ -5128,16 +5117,21 @@ const conf = {
 
 function rollOff (nfts) {
     let winners = [];
+    let prizeCounts = {
+        0: 10,
+        1: 4,
+        2: 2,
+    };
     const { accounts, bonus, chance } = conf[nfts.rank];
     while (winners.length < nfts.count) {
         let i = 0;
         for (const [accountId, pctOfMax] of accounts) {
             i++;
             if (i <= nfts.start) continue;
-            const target = 1 - (bonus * pctOfMax) - chance;
+            const target = 1 - Math.min(bonus * pctOfMax, bonus) - chance;
             const roll = Math.random();
-            console.log(`${accountId} rolled ${roll} / ${target}`);
             if (roll >= target && !winners.includes(accountId)) {
+                if (prizeCounts)
                 console.log(`${accountId} wins a prize.`);
                 winners.push(accountId);
                 if (winners.length === nfts.count) break;
@@ -5145,7 +5139,6 @@ function rollOff (nfts) {
         }
     };
     const result = [`${nfts.label} (${nfts.rank})`, winners];
-    console.log(result);
     return result;
 }
 
@@ -5153,4 +5146,6 @@ let tabulatedWinners = [];
 for (const roll of rolls) {
     tabulatedWinners.push(rollOff(roll));
 }
-console.log(tabulatedWinners);
+for (const [label, ids] of tabulatedWinners) {
+    console.log(label, '\n', ids.join('\n'), '\n');
+}
